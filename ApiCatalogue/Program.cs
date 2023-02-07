@@ -1,5 +1,6 @@
 using ApiCatalogue.Data;
 using ApiCatalogue.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -30,6 +31,17 @@ app.MapPost("/category", async(Category category, AppCatalogueDBContext db) =>
 
     return Results.Created($"/category/{category.Id}", category);
 });
+
+// Seeking all category
+app.MapGet("/category", async (AppCatalogueDBContext db) => await db.Categorys.ToListAsync());
+
+// Seeking category by id
+app.MapGet("/catgory/{id}", async (AppCatalogueDBContext db, int id) =>
+{
+    return await db.Categorys.FindAsync(id) is Category category ? Results.Ok(category) : Results.NotFound();
+
+});
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

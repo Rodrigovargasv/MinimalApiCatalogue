@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiCatalogue.Migrations
 {
     [DbContext(typeof(AppCatalogueDBContext))]
-    [Migration("20230207193632_Init")]
+    [Migration("20230207194845_Init")]
     partial class Init
     {
         /// <inheritdoc />

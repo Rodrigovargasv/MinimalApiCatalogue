@@ -1,4 +1,5 @@
 using ApiCatalogue.Data;
+using ApiCatalogue.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -17,6 +18,18 @@ builder.Services.AddDbContext<AppCatalogueDBContext>(options =>
 
 
 var app = builder.Build();
+
+// Define  the endpoints
+
+app.MapGet("/", () => "Welcome to ApiCatalogue");
+
+app.MapPost("/category", async(Category category, AppCatalogueDBContext db) =>
+{
+    db.Categorys.Add(category);
+    await db.SaveChangesAsync();
+
+    return Results.Created($"/category/{category.Id}", category);
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

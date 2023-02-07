@@ -58,6 +58,21 @@ app.MapPut("/category/{id}", async (AppCatalogueDBContext db, int id, Category c
     
 });
 
+
+app.MapDelete("/category/{id}", async(AppCatalogueDBContext db, int id) =>
+{
+    if (await db.Categorys.FindAsync(id) is Category category)
+    {
+        db.Categorys.Remove(category);
+
+        db.SaveChanges();
+
+        return Results.Ok();
+
+    }
+    return Results.NotFound();
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

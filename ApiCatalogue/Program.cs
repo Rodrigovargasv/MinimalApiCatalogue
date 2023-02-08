@@ -24,9 +24,11 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Welcome to ApiCatalogue");
 
-app.MapPost("/category", async(Category category, AppCatalogueDBContext db) =>
+// Creates new category
+app.MapPost("/category", async(AppCatalogueDBContext db, Category category) =>
 {
     db.Categorys.Add(category);
+
     await db.SaveChangesAsync();
 
     return Results.Created($"/category/{category.Id}", category);
@@ -36,21 +38,23 @@ app.MapPost("/category", async(Category category, AppCatalogueDBContext db) =>
 app.MapGet("/category", async (AppCatalogueDBContext db) => await db.Categorys.ToListAsync());
 
 // Seeking category by id
-app.MapGet("/catgory/{id}", async (AppCatalogueDBContext db, int id) =>
+app.MapGet("/category/{id}", async (AppCatalogueDBContext db, int id) =>
 {
     return await db.Categorys.FindAsync(id) is Category category ? Results.Ok(category) : Results.NotFound();
 
 });
 
+
+// Update category
 app.MapPut("/category/{id}", async (AppCatalogueDBContext db, int id, Category category) =>
 {
-    var value = await db.Categorys.FindAsync(id);
+    var categoryDB = await db.Categorys.FindAsync(id);
 
-    if (value is null) return Results.NotFound();
+    if (categoryDB is null) return Results.NotFound();
 
-    value.Name = category.Name;
+    categoryDB.Name = category.Name;
     
-    value.Description = category.Description;
+    categoryDB.Description = category.Description;
 
     await db.SaveChangesAsync();
 
@@ -58,14 +62,14 @@ app.MapPut("/category/{id}", async (AppCatalogueDBContext db, int id, Category c
     
 });
 
-
+// Delele category
 app.MapDelete("/category/{id}", async(AppCatalogueDBContext db, int id) =>
 {
     if (await db.Categorys.FindAsync(id) is Category category)
     {
         db.Categorys.Remove(category);
 
-        db.SaveChanges();
+        await db.SaveChangesAsync();
 
         return Results.Ok();
 
@@ -73,12 +77,24 @@ app.MapDelete("/category/{id}", async(AppCatalogueDBContext db, int id) =>
     return Results.NotFound();
 });
 
+//  Creates new product
+app.MapPost("/product", async(AppCatalogueDBContext db, Product product) => 
+{
+    db.Products.Add(product);
+    await db.SaveChangesAsync();
+    return Results.Created($"/product/{product.Id}", product);
+});
+
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 
 
 app.Run();

@@ -88,6 +88,47 @@ app.MapPost("/product", async(AppCatalogueDBContext db, Product product) =>
 
 app.MapGet("/product", async (AppCatalogueDBContext db) => await db.Products.ToListAsync());
 
+app.MapGet("/product/{id}", async (AppCatalogueDBContext db, int id) =>
+{
+    return await db.Products.FindAsync(id) is Product product ? Results.Ok(product) : Results.NotFound();
+});
+
+
+app.MapPut("/product/{id}", async (AppCatalogueDBContext db, Product product, int id) =>
+{
+    var productDB = await db.Products.FindAsync(id);
+
+    if (product is null) return Results.NotFound();
+
+    productDB.Name = product.Name;
+    productDB.Description = product.Description;
+    productDB.Category = product.Category;
+    productDB.CategoryId = id;
+    productDB.Stock = product.Stock;
+    productDB.Price = product.Price;
+    
+    await db.SaveChangesAsync();
+
+    return Results.NoContent();
+    
+});
+
+
+app.MapDelete("/product/{id}", async (AppCatalogueDBContext db, int id) =>
+{
+    var product = await db.Products.FindAsync(id);
+
+    if(product is null) return Results.NotFound();
+
+    db.Products.Remove(product);
+
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+
+
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

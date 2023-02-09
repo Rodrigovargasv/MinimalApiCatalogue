@@ -86,6 +86,8 @@ app.MapPost("/product", async(AppCatalogueDBContext db, Product product) =>
 });
 
 
+app.MapGet("/product", async (AppCatalogueDBContext db) => await db.Products.ToListAsync());
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

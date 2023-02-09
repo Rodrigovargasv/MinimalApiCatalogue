@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +17,35 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ApiCatalogo", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = @"JWT Authorization header using the Bearer scheme.
+                    Enter 'Bearer'[space].Example: \'Bearer 12345abcdef\'",
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                          new OpenApiSecurityScheme
+                          {
+                              Reference = new OpenApiReference
+                              {
+                                  Type = ReferenceType.SecurityScheme,
+                                  Id = "Bearer"
+                              }
+                          },
+                         new string[] {}
+                    }
+                });
+});
 
 // Add service Entity Framework
 builder.Services.AddDbContext<AppCatalogueDBContext>(options =>
@@ -25,22 +54,23 @@ builder.Services.AddDbContext<AppCatalogueDBContext>(options =>
 // ADD service Jwt token
 builder.Services.AddSingleton<ITokenService>(new TokenService());
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
-    AddJwtBearer(option => 
-    {
-        option.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+builder.Services.AddAuthentication
+                 (JwtBearerDefaults.AuthenticationScheme)
+                 .AddJwtBearer(options =>
+                 {
+                     options.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidateIssuer = true,
+                         ValidateAudience = true,
+                         ValidateLifetime = true,
+                         ValidateIssuerSigningKey = true,
 
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt: Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
-
-        };
-    });
+                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                         ValidAudience = builder.Configuration["Jwt:Audience"],
+                         IssuerSigningKey = new SymmetricSecurityKey
+                         (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                     };
+                 });
 
 builder.Services.AddAuthorization();
 
@@ -52,8 +82,9 @@ var app = builder.Build();
 app.MapPost("/login", [AllowAnonymous] (UserModel userModel, ITokenService tokenService) =>
 {
     if (userModel == null)
-        return Results.BadRequest("Login Invalido");
-
+    {
+        return Results.BadRequest("Login Inválido");
+    }
     if (userModel.Username == "rodrigo" && userModel.Password == "87053277")
     {
         var tokenString = tokenService.GenerationToken(app.Configuration["Jwt:Key"],
@@ -64,10 +95,13 @@ app.MapPost("/login", [AllowAnonymous] (UserModel userModel, ITokenService token
     }
     else
     {
-        return Results.BadRequest("Login invalido");
+        return Results.BadRequest("Login Inválido");
     }
+}).Produces(StatusCodes.Status400BadRequest)
+              .Produces(StatusCodes.Status200OK)
+              .WithName("Login")
+              .WithTags("Autenticacao");
 
-});
 
 // Define  the endpoints
 
@@ -84,7 +118,7 @@ app.MapPost("/category", async(AppCatalogueDBContext db, Category category) =>
 });
 
 // Seeking all category
-app.MapGet("/category", async (AppCatalogueDBContext db) => await db.Categorys.ToListAsync());
+app.MapGet("/category", async (AppCatalogueDBContext db) => await db.Categorys.ToListAsync()).RequireAuthorization();
 
 // Seeking category by id
 app.MapGet("/category/{id}", async (AppCatalogueDBContext db, int id) =>

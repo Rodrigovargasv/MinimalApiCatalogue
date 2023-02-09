@@ -1,4 +1,6 @@
-﻿namespace ApiCatalogue.Models
+﻿using System.Text.Json.Serialization;
+
+namespace ApiCatalogue.Models
 {
     public class Product
     {
@@ -11,6 +13,8 @@
         public int? Stock { get; set; }
 
         public int CategoryId { get; set; }
+
+        [JsonIgnore]
         public Category? Category { get; set;}
 
     }

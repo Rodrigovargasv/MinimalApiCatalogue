@@ -48,7 +48,10 @@ namespace ApiCatalogue.Migrations
             modelBuilder.Entity("ApiCatalogue.Models.Product", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
@@ -78,6 +81,8 @@ namespace ApiCatalogue.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Products");
                 });
 
@@ -85,7 +90,7 @@ namespace ApiCatalogue.Migrations
                 {
                     b.HasOne("ApiCatalogue.Models.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

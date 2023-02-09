@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiCatalogue.Migrations
 {
     [DbContext(typeof(AppCatalogueDBContext))]
-    [Migration("20230207194845_Init")]
+    [Migration("20230209182317_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -51,7 +51,10 @@ namespace ApiCatalogue.Migrations
             modelBuilder.Entity("ApiCatalogue.Models.Product", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
@@ -81,6 +84,8 @@ namespace ApiCatalogue.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Products");
                 });
 
@@ -88,7 +93,7 @@ namespace ApiCatalogue.Migrations
                 {
                     b.HasOne("ApiCatalogue.Models.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

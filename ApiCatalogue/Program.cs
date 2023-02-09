@@ -86,7 +86,6 @@ app.MapPost("/product", async(AppCatalogueDBContext db, Product product) =>
 });
 
 
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

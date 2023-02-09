@@ -41,9 +41,10 @@ namespace ApiCatalogue.Data
 
             // relation one to many
             mb.Entity<Product>()
-                .HasOne<Category>(p => p.Category)
+                .HasOne<Category>(c => c.Category)
                 .WithMany(p => p.Products)
-                .HasForeignKey(c => c.Id);
+                .HasForeignKey(c => c.CategoryId);
+
 
         }
     }

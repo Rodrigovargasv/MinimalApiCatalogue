@@ -17,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ApiCatalogo", Version = "v1" });
@@ -160,6 +161,8 @@ app.MapDelete("/category/{id}", async(AppCatalogueDBContext db, int id) =>
     return Results.NotFound();
 });
 
+#region Endpoints the Product
+
 //  Creates new product
 app.MapPost("/product", async(AppCatalogueDBContext db, Product product) => 
 {
@@ -197,6 +200,7 @@ app.MapPut("/product/{id}", async (AppCatalogueDBContext db, Product product, in
 });
 
 
+
 app.MapDelete("/product/{id}", async (AppCatalogueDBContext db, int id) =>
 {
     var product = await db.Products.FindAsync(id);
@@ -212,6 +216,7 @@ app.MapDelete("/product/{id}", async (AppCatalogueDBContext db, int id) =>
 
 });
 
+#endregion
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
